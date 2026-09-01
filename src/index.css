@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,14 +16,68 @@ body,
 
 body {
   margin: 0;
-  background-color: #020617;
-  color: #e2e8f0;
+  background-color: #07090f;
+  color: #e6ecf5;
   font-family:
-    "Segoe UI",
+    "Plus Jakarta Sans",
     system-ui,
     -apple-system,
     Roboto,
     "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(74, 222, 128, 0.28);
+  color: #f0fdf4;
+}
+
+/* Subtle global scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a2233;
+  border-radius: 8px;
+  border: 2px solid #0a0e17;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #24304a;
+}
+
+@layer components {
+  /* Glass card — base surface used across the dashboard */
+  .glass-card {
+    @apply relative rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.015] shadow-card backdrop-blur-sm;
+  }
+
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-grass-400/25 hover:shadow-glow;
+  }
+
+  /* Section heading eyebrow */
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+  }
+
+  /* Gradient display text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-grass-300 via-emerald-300 to-creeper-300 bg-clip-text text-transparent;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply animate-shimmer rounded-lg bg-gradient-to-r from-slate-800/40 via-slate-700/40 to-slate-800/40 bg-[length:400px_100%];
+  }
+
+  /* Focus ring */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-grass-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900;
+  }
 }

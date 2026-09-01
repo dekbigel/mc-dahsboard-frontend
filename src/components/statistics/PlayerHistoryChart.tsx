@@ -13,17 +13,16 @@ import type { PlayerHistoryPoint, ServerHistorySummary } from "@shared";
 import { apiClient } from "../../lib/apiClient";
 import { queryKeys } from "../../lib/queryKeys";
 import { formatDuration, formatTime } from "../../lib/format";
+import { Icon, type IconName } from "../../lib/icons";
+import { Card } from "../ui/Card";
 import { Spinner } from "../ui/Spinner";
 import { ErrorState } from "../ui/ErrorState";
 import { EmptyState } from "../ui/EmptyState";
 
 const PERIODS = [
-  { id: "24h", label: "Last 24 Hours" },
-  { id: "7d", label: "Last 7 Days" },
+  { id: "24h", label: "24 Jam" },
+  { id: "7d", label: "7 Hari" },
 ] as const;
-
-const btnClass =
-  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
 
 function formatAxisTime(iso: string, period: string): string {
   if (period === "7d") {
@@ -57,123 +56,157 @@ export default function PlayerHistoryChart() {
   const summary = summaryQuery.data;
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-surface-light p-6">
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
-          Player History
-        </h2>
-        <div className="flex gap-2">
+    <Card
+      title="Player History"
+      icon={<Icon name="trending-up" />}
+      action={
+        <div className="flex gap-1 rounded-full border border-white/[0.07] bg-white/[0.03] p-1">
           {PERIODS.map((p) => (
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
-              className={`${btnClass} ${
+              className={`focus-ring rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
                 period === p.id
-                  ? "bg-emerald-500/20 text-emerald-300"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                  ? "bg-grass-500/15 text-grass-300 ring-1 ring-inset ring-grass-400/25"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               {p.label}
             </button>
           ))}
         </div>
-      </div>
-
+      }
+      className="animate-fade-up"
+    >
       {/* Summary cards */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <SummaryCard
+          icon="trending-up"
           label="Peak Players"
-          value={
-            summary?.pointCount
-              ? String(summary.peakPlayers)
-              : "Unavailable"
-          }
+          value={summary?.pointCount ? String(summary.peakPlayers) : "—"}
+          tone="text-grass-300 bg-grass-500/10 ring-grass-400/20"
         />
         <SummaryCard
+          icon="chart"
           label="Average Online"
-          value={
-            summary?.pointCount
-              ? String(summary.averageOnline)
-              : "Unavailable"
-          }
+          value={summary?.pointCount ? String(summary.averageOnline) : "—"}
+          tone="text-creeper-300 bg-creeper-500/10 ring-creeper-400/20"
         />
         <SummaryCard
-          label="Unique Players Today"
+          icon="user-check"
+          label="Unique Today"
           value={String(summary?.uniquePlayersToday ?? 0)}
+          tone="text-amethyst-300 bg-amethyst-500/10 ring-amethyst-400/20"
         />
         <SummaryCard
-          label="Total Playtime Today"
+          icon="timer"
+          label="Playtime Today"
           value={formatDuration(summary?.playtimeTodaySeconds ?? null)}
+          tone="text-gold-300 bg-gold-500/10 ring-gold-400/20"
         />
       </div>
 
       {/* Chart */}
       {historyQuery.isLoading ? (
-        <Spinner />
+        <Spinner label="Memuat histori..." />
       ) : historyQuery.isError ? (
         <ErrorState error={historyQuery.error} />
       ) : chartData.length === 0 ? (
-        <EmptyState message="Belum ada data histori." />
+        <EmptyState message="Belum ada data histori." icon="chart" />
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-            <defs>
-              <linearGradient id="colorOnline" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#34d399" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis
-              dataKey="time"
-              stroke="#64748b"
-              tick={{ fontSize: 11 }}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              stroke="#64748b"
-              allowDecimals={false}
-              width={30}
-              tick={{ fontSize: 11 }}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#171a21",
-                border: "1px solid #2a2f3a",
-                borderRadius: "8px",
-                fontSize: "13px",
-                color: "#e2e8f0",
-              }}
-              labelStyle={{ color: "#94a3b8" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="online"
-              stroke="#34d399"
-              strokeWidth={2}
-              fill="url(#colorOnline)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div className="rounded-xl border border-white/[0.05] bg-night-900/40 p-3">
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+              <defs>
+                <linearGradient id="colorOnline" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#4ade80" stopOpacity={0.35} />
+                  <stop offset="60%" stopColor="#4ade80" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#4ade80" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="4 6"
+                stroke="rgba(148,163,184,0.10)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="time"
+                stroke="#475569"
+                tick={{ fontSize: 11, fill: "#64748b" }}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                stroke="#475569"
+                allowDecimals={false}
+                width={32}
+                tick={{ fontSize: 11, fill: "#64748b" }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                cursor={{ stroke: "rgba(74,222,128,0.3)", strokeWidth: 1 }}
+                contentStyle={{
+                  backgroundColor: "#0d1220",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "12px",
+                  fontSize: "13px",
+                  color: "#e6ecf5",
+                  boxShadow: "0 8px 30px -8px rgba(0,0,0,0.6)",
+                }}
+                labelStyle={{ color: "#94a3b8", fontWeight: 600 }}
+                itemStyle={{ color: "#4ade80", fontWeight: 700 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="online"
+                name="Players online"
+                stroke="#4ade80"
+                strokeWidth={2.5}
+                fill="url(#colorOnline)"
+                dot={false}
+                activeDot={{
+                  r: 4,
+                  fill: "#4ade80",
+                  stroke: "#07090f",
+                  strokeWidth: 2,
+                }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       )}
-    </div>
+    </Card>
   );
 }
 
 function SummaryCard({
+  icon,
   label,
   value,
+  tone,
 }: {
+  icon: IconName;
   label: string;
   value: string;
+  tone: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 text-lg font-bold text-slate-100">{value}</p>
+    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3.5">
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ${tone}`}
+      >
+        <Icon name={icon} className="h-4 w-4" />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          {label}
+        </p>
+        <p className="truncate font-display text-lg font-bold tabular-nums text-slate-100">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
