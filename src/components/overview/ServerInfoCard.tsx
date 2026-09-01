@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { ServerStatus } from "@shared";
 import { apiClient } from "../../lib/apiClient";
 import { queryKeys } from "../../lib/queryKeys";
+import { Icon, type IconName } from "../../lib/icons";
+import { Card } from "../ui/Card";
 import { Spinner } from "../ui/Spinner";
 import { ErrorState } from "../ui/ErrorState";
 
@@ -11,30 +13,58 @@ export default function ServerInfoCard() {
     queryFn: () => apiClient.get<ServerStatus>("/server/status"),
   });
 
-  if (isLoading) return <Spinner />;
-  if (isError) return <ErrorState error={error} />;
-  if (!status) return null;
-
-  const rows: { label: string; value: string }[] = [
-    { label: "Version", value: status.version ?? "Unknown" },
-    { label: "Gamemode", value: status.gamemode ?? "Unknown" },
-    { label: "Difficulty", value: status.difficulty ?? "Unknown" },
-    { label: "Ping", value: status.ping != null ? `${status.ping} ms` : "Unknown" },
-  ];
-
   return (
-    <div className="rounded-xl border border-slate-800 bg-surface-light p-6">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Server Information
-      </h2>
-      <dl className="space-y-3 text-sm">
-        {rows.map((r) => (
-          <div key={r.label} className="flex items-center justify-between">
-            <dt className="text-slate-500">{r.label}</dt>
-            <dd className="font-medium text-slate-200">{r.value}</dd>
-          </div>
-        ))}
-      </dl>
+    <Card title="Server Information" icon={<Icon name="server" />}>
+      {isLoading ? (
+        <Spinner />
+      ) : isError ? (
+        <ErrorState error={error} />
+      ) : !status ? null : (
+        <dl className="grid grid-cols-2 gap-3">
+          <InfoTile icon="layers" label="Version" value={status.version ?? "Unknown"} />
+          <InfoTile icon="swords" label="Gamemode" value={status.gamemode ?? "Unknown"} />
+          <InfoTile
+            icon="shield"
+            label="Difficulty"
+            value={status.difficulty ?? "Unknown"}
+          />
+          <InfoTile
+            icon="wifi"
+            label="Ping"
+            value={status.ping != null ? `${status.ping} ms` : "Unknown"}
+            highlight={status.ping != null && status.ping < 60}
+          />
+        </dl>
+      )}
+    </Card>
+  );
+}
+
+function InfoTile({
+  icon,
+  label,
+  value,
+  highlight = false,
+}: {
+  icon: IconName;
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3.5">
+      <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <Icon name={icon} className="h-3.5 w-3.5" />
+        {label}
+      </dt>
+      <dd
+        className={`mt-1.5 truncate font-display text-lg font-bold ${
+          highlight ? "text-grass-300" : "text-slate-100"
+        }`}
+        title={value}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
